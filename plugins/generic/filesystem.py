@@ -41,7 +41,7 @@ class Filesystem:
             lengthQuery = "SELECT LENGTH(LOAD_FILE('%s'))" % remoteFile
 
         elif Backend.isDbms(DBMS.PGSQL) and not fileRead:
-            lengthQuery = "SELECT LENGTH(data) FROM pg_largeobject WHERE loid=%d" % self.oid
+            lengthQuery = "SELECT SUM(LENGTH(data)) FROM pg_largeobject WHERE loid=%d" % self.oid
 
         elif Backend.isDbms(DBMS.MSSQL):
             self.createSupportTbl(self.fileTblName, self.tblField, "VARBINARY(MAX)")

